@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scanner EAN</title>
+
+<style>
+body{
+  margin:0;
+  background:#000;
+  color:white;
+  font-family:Arial;
+  text-align:center;
+}
+#video{
+  width:100vw;
+  height:100vh;
+  object-fit:cover;
+}
+#overlay{
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+}
+#box{
+  width:70%;
+  height:25%;
+  border:4px solid #00FF88;
+  border-radius:12px;
+}
+#txt{
+  position:fixed;
+  bottom:40px;
+  width:100%;
+  font-size:18px;
+}
+</style>
+</head>
+
+<body>
+
+<video id="video" autoplay playsinline></video>
+
+<div id="overlay">
+  <div id="box"></div>
+</div>
+
+<div id="txt">Placez le code-barres dans le cadre</div>
+
+<script>
+const video = document.getElementById("video");
+let detected = false;
+
+// Ouvrir caméra arrière
+navigator.mediaDevices.getUserMedia({
+  video: { facingMode: "environment" }
+}).then(stream => {
+  video.srcObject = stream;
+});
+
+// Scanner EAN
+const detector = new BarcodeDetector({
+  formats: ['ean_13','ean_8']
+});
+
+async function scan(){
+  if(detected) return;
+
+  try{
+    const barcodes = await detector.detect(video);
+
+    if(barcodes.length > 0){
+      detected = true;
+      const code = barcodes[0].rawValue;
+
+      document.getElementById("txt").innerHTML =
+        "Code détecté : " + code;
+
+      // Renvoi vers PandaSuite
+      setTimeout(()=>{
+        window.location = "pandasuite://scan?ean=" + code;
+      },800);
+    }
+  }catch(e){}
+
+  requestAnimationFrame(scan);
+}
+
+scan();
+</script>
+
+</body>
+</html>
