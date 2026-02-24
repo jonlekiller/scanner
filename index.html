@@ -82,7 +82,7 @@ async function scan(){
 
       // Renvoi vers PandaSuite
       setTimeout(()=>{
-        window.location = "pandasuite://scan?ean=" + code;
+        window.parent.postMessage(code,"*");
       },800);
     }
   }catch(e){}
