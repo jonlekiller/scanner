@@ -1,138 +1,80 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scanner EAN</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body{
-  margin:0;
-  background:#000;
-  color:white;
-  font-family:Arial;
-  text-align:center;
-}
-#video{
-  width:100vw;
-  height:100vh;
-  object-fit:cover;
-}
-#overlay{
-  position:fixed;
-  top:0;left:0;right:0;bottom:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  pointer-events:none;
-}
+body{margin:0;background:black;color:white;text-align:center;font-family:Arial}
+video{width:100vw;height:100vh;object-fit:cover}
 #box{
-  width:70%;
-  height:25%;
-  border:4px solid #00FF88;
-  border-radius:12px;
-}
-#txt{
-  position:fixed;
-  bottom:90px;
-  width:100%;
-  font-size:18px;
+position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+width:70%;height:25%;border:4px solid #00FF88;border-radius:12px
 }
 #start{
-  position:fixed;
-  bottom:30px;
-  left:50%;
-  transform:translateX(-50%);
-  padding:14px 24px;
-  font-size:18px;
-  background:#00FF88;
-  color:black;
-  border-radius:10px;
-  border:none;
+position:fixed;bottom:40px;left:50%;transform:translateX(-50%);
+padding:14px 24px;background:#00FF88;color:black;border-radius:10px
 }
+#txt{position:fixed;top:30px;width:100%}
 </style>
 </head>
 
 <body>
 
-<video id="video" playsinline muted></video>
-
-<div id="overlay">
-  <div id="box"></div>
-</div>
-
-<div id="txt">Appuyez pour activer la caméra</div>
+<video id="video" playsinline></video>
+<div id="box"></div>
+<div id="txt">Activer la caméra</div>
 <button id="start">Scanner</button>
 
-<script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.js"></script>
-
 <script>
-const startBtn = document.getElementById("start");
-const txt = document.getElementById("txt");
 const video = document.getElementById("video");
+const txt = document.getElementById("txt");
+const btn = document.getElementById("start");
 
-let started = false;
+let detector;
+let running=false;
 
-startBtn.onclick = async function(){
+btn.onclick = async () => {
 
-  if(started) return;
-  started = true;
-
-  startBtn.style.display="none";
+  btn.style.display="none";
   txt.innerHTML="Autorisation caméra...";
 
-  try{
-    // 🔹 on récupère NOUS le flux caméra (corrige écran noir)
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video:{ facingMode:{ ideal:"environment" } },
-      audio:false
-    });
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video:{ facingMode:"environment" }
+  });
 
-    video.srcObject = stream;
-    video.setAttribute("playsinline", true);
-    await video.play();
-
-  }catch(e){
-    txt.innerHTML="Caméra refusée";
-    return;
-  }
+  video.srcObject = stream;
+  await video.play();
 
   txt.innerHTML="Scanner en cours...";
 
-  // 🔹 Quagga lit la vidéo déjà active
-  Quagga.init({
-    inputStream:{
-      type:"LiveStream",
-      target:video,
-      constraints:{
-        facingMode:"environment"
+  detector = new BarcodeDetector({
+    formats:['ean_13','ean_8']
+  });
+
+  running=true;
+  scan();
+};
+
+async function scan(){
+  if(!running) return;
+
+  try{
+    const codes = await detector.detect(video);
+
+    if(codes.length){
+      const code=codes[0].rawValue;
+      txt.innerHTML="Code détecté : "+code;
+
+      if(window.PandaBridge){
+        PandaBridge.emit("scan",{ean:code});
       }
-    },
-    decoder:{
-      readers:["ean_reader","ean_8_reader"]
-    },
-    locate:true
-  },function(err){
-    if(err){
-      txt.innerHTML="Erreur initialisation scanner";
+
+      running=false;
       return;
     }
-    Quagga.start();
-  });
+  }catch(e){}
 
-  Quagga.onDetected(function(result){
-
-    const code = result.codeResult.code;
-    txt.innerHTML="Code détecté : "+code;
-
-    // 🔹 envoi au composant PandaSuite
-    if(window.PandaBridge){
-      PandaBridge.emit("scan",{ean:code});
-    }
-
-    Quagga.stop();
-  });
-};
+  requestAnimationFrame(scan);
+}
 </script>
 
 </body>
