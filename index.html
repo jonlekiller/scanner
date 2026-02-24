@@ -34,13 +34,13 @@ body{
 }
 #txt{
   position:fixed;
-  bottom:40px;
+  bottom:90px;
   width:100%;
   font-size:18px;
 }
 #start{
   position:fixed;
-  bottom:40px;
+  bottom:30px;
   left:50%;
   transform:translateX(-50%);
   padding:14px 24px;
@@ -55,40 +55,66 @@ body{
 
 <body>
 
-<video id="video" playsinline></video>
+<video id="video" playsinline muted></video>
 
 <div id="overlay">
   <div id="box"></div>
 </div>
 
-<button id="start">Activer la caméra</button>
-<div id="txt">Appuyez pour scanner</div>
+<div id="txt">Appuyez pour activer la caméra</div>
+<button id="start">Scanner</button>
 
 <script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.js"></script>
 
 <script>
 const startBtn = document.getElementById("start");
 const txt = document.getElementById("txt");
+const video = document.getElementById("video");
 
-startBtn.onclick = function(){
+let started = false;
+
+startBtn.onclick = async function(){
+
+  if(started) return;
+  started = true;
 
   startBtn.style.display="none";
+  txt.innerHTML="Autorisation caméra...";
+
+  try{
+    // 🔹 on récupère NOUS le flux caméra (corrige écran noir)
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video:{ facingMode:{ ideal:"environment" } },
+      audio:false
+    });
+
+    video.srcObject = stream;
+    video.setAttribute("playsinline", true);
+    await video.play();
+
+  }catch(e){
+    txt.innerHTML="Caméra refusée";
+    return;
+  }
+
   txt.innerHTML="Scanner en cours...";
 
+  // 🔹 Quagga lit la vidéo déjà active
   Quagga.init({
     inputStream:{
       type:"LiveStream",
-      target:document.querySelector('#video'),
+      target:video,
       constraints:{
         facingMode:"environment"
       }
     },
     decoder:{
       readers:["ean_reader","ean_8_reader"]
-    }
+    },
+    locate:true
   },function(err){
     if(err){
-      txt.innerHTML="Caméra non supportée";
+      txt.innerHTML="Erreur initialisation scanner";
       return;
     }
     Quagga.start();
@@ -97,10 +123,9 @@ startBtn.onclick = function(){
   Quagga.onDetected(function(result){
 
     const code = result.codeResult.code;
-
     txt.innerHTML="Code détecté : "+code;
 
-    // Envoi direct à PandaSuite
+    // 🔹 envoi au composant PandaSuite
     if(window.PandaBridge){
       PandaBridge.emit("scan",{ean:code});
     }
