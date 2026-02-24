@@ -1,0 +1,22 @@
+{
+  "version": "2.0.0",
+  "name": "Scanner EAN",
+  "description": "Scanner code-barres EAN via la caméra",
+  "icon": "",
+  "main": "index.html",
+
+  "events": [
+    {
+      "id": "scan",
+      "name": "Code scanné",
+      "description": "Déclenché quand un code EAN est détecté",
+      "queryable": {
+        "ean": "string"
+      }
+    }
+  ],
+
+  "permissions": [
+    "camera"
+  ]
+}
