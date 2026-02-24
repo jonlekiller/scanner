@@ -74,17 +74,19 @@ async function scan(){
     const barcodes = await detector.detect(video);
 
     if(barcodes.length > 0){
-      detected = true;
-      const code = barcodes[0].rawValue;
+  detected = true;
+  const code = barcodes[0].rawValue;
 
-      document.getElementById("txt").innerHTML =
-        "Code détecté : " + code;
+  document.getElementById("txt").innerHTML =
+    "Code détecté : " + code;
 
-      // Renvoi vers PandaSuite
-      setTimeout(()=>{
-       window.parent.postMessage(JSON.stringify({ean:code}),"*");
-      },800);
+  // Envoi à PandaSuite
+  setTimeout(()=>{
+    if (window.PandaBridge) {
+      PandaBridge.send("ean:" + code);
     }
+  },800);
+}
   }catch(e){}
 
   requestAnimationFrame(scan);
