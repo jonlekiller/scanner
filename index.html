@@ -38,61 +38,76 @@ body{
   width:100%;
   font-size:18px;
 }
+#start{
+  position:fixed;
+  bottom:40px;
+  left:50%;
+  transform:translateX(-50%);
+  padding:14px 24px;
+  font-size:18px;
+  background:#00FF88;
+  color:black;
+  border-radius:10px;
+  border:none;
+}
 </style>
 </head>
 
 <body>
 
-<video id="video" autoplay playsinline></video>
+<video id="video" playsinline></video>
 
 <div id="overlay">
   <div id="box"></div>
 </div>
 
-<div id="txt">Placez le code-barres dans le cadre</div>
+<button id="start">Activer la caméra</button>
+<div id="txt">Appuyez pour scanner</div>
+
+<script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.js"></script>
 
 <script>
-const video = document.getElementById("video");
-let detected = false;
+const startBtn = document.getElementById("start");
+const txt = document.getElementById("txt");
 
-// Ouvrir caméra arrière
-navigator.mediaDevices.getUserMedia({
-  video: { facingMode: "environment" }
-}).then(stream => {
-  video.srcObject = stream;
-});
+startBtn.onclick = function(){
 
-// Scanner EAN
-const detector = new BarcodeDetector({
-  formats: ['ean_13','ean_8']
-});
+  startBtn.style.display="none";
+  txt.innerHTML="Scanner en cours...";
 
-async function scan(){
-  if(detected) return;
-
-  try{
-    const barcodes = await detector.detect(video);
-
-    if(barcodes.length > 0){
-  detected = true;
-  const code = barcodes[0].rawValue;
-
-  document.getElementById("txt").innerHTML =
-    "Code détecté : " + code;
-
-  // Envoi à PandaSuite
-  setTimeout(()=>{
-    if (window.PandaBridge) {
-      PandaBridge.send("ean:" + code);
+  Quagga.init({
+    inputStream:{
+      type:"LiveStream",
+      target:document.querySelector('#video'),
+      constraints:{
+        facingMode:"environment"
+      }
+    },
+    decoder:{
+      readers:["ean_reader","ean_8_reader"]
     }
-  },800);
-}
-  }catch(e){}
+  },function(err){
+    if(err){
+      txt.innerHTML="Caméra non supportée";
+      return;
+    }
+    Quagga.start();
+  });
 
-  requestAnimationFrame(scan);
-}
+  Quagga.onDetected(function(result){
 
-scan();
+    const code = result.codeResult.code;
+
+    txt.innerHTML="Code détecté : "+code;
+
+    // Envoi direct à PandaSuite
+    if(window.PandaBridge){
+      PandaBridge.emit("scan",{ean:code});
+    }
+
+    Quagga.stop();
+  });
+};
 </script>
 
 </body>
