@@ -10,7 +10,7 @@
       "id": "scan",
       "name": "Code scanné",
       "description": "Déclenché quand un code EAN est détecté",
-      "queryable": {
+      "data": {
         "ean": "string"
       }
     }
@@ -19,4 +19,5 @@
   "permissions": [
     "camera"
   ]
+
 }
