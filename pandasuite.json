@@ -1,18 +1,16 @@
 {
-  "version": "2.0.0",
   "name": "Scanner EAN",
   "main": "index.html",
-
   "events": [
     {
       "id": "scan",
-      "name": "scan",
       "label": "Code scanné",
-      "data": {
-        "ean": {
+      "data": [
+        {
+          "id": "ean",
           "type": "text"
         }
-      }
+      ]
     }
   ]
 }
