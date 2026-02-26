@@ -1,6 +1,8 @@
 {
+  "type": "component",
   "name": "Scanner EAN",
   "main": "index.html",
+
   "events": [
     {
       "id": "scan",
