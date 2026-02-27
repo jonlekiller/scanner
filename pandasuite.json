@@ -1,22 +1,15 @@
 {
-  "version": "2.0.0",
+  "type": "component",
   "name": "Scanner EAN",
-  "description": "Scanner code-barres EAN via la caméra",
-  "icon": "",
   "main": "index.html",
 
   "events": [
     {
       "id": "scan",
-      "name": "Code scanné",
-      "description": "Déclenché quand un code EAN est détecté",
-      "queryable": {
-        "ean": "string"
-      }
+      "label": "Code scanné",
+      "data": [
+        { "id": "ean", "type": "text" }
+      ]
     }
-  ],
-
-  "permissions": [
-    "camera"
   ]
 }
