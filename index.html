@@ -80,7 +80,7 @@ async function scan(){
         txt.innerHTML="Code détecté : "+code;
 
         if(window.PandaBridge){
-         PandaBridge.send({ ean: String(code) });
+         PandaBridge.emit("scan", { ean: String(code) });
         }
 
         running=false;
