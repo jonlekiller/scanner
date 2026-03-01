@@ -32,6 +32,20 @@ const btn = document.getElementById("start");
 let detector;
 let running=false;
 
+/* 🔹 valeur mémorisée pour PandaSuite */
+let lastEAN = "";
+
+/* 🔹 PandaSuite va appeler cette fonction quand tu fais l'action "Code scanné" */
+if (window.PandaBridge) {
+  PandaBridge.on("scan", function () {
+    PandaBridge.send({
+      scan: {
+        ean: lastEAN
+      }
+    });
+  });
+}
+
 btn.onclick = async () => {
 
   btn.style.display="none";
@@ -79,13 +93,8 @@ async function scan(){
       if(count >= 4){
         txt.innerHTML="Code détecté : "+code;
 
-        if(window.PandaBridge){
-         PandaBridge.send({
-  scan: {
-    ean: String(code)
-  }
-});
-        }
+        /* on stocke le code — on ne l'envoie plus */
+        lastEAN = String(code);
 
         running=false;
         return;
