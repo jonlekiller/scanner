@@ -1,16 +1,18 @@
 {
+  "version": "2.0.0",
   "name": "Scanner EAN",
   "main": "index.html",
+
   "events": [
     {
       "id": "scan",
-      "label": "Code scanné",
-      "data": [
-        {
-          "id": "ean",
+      "name": "Code scanné",
+      "queryable": {
+        "_desc": "Retourne le code EAN détecté",
+        "ean": {
           "type": "text"
         }
-      ]
+      }
     }
   ]
 }
