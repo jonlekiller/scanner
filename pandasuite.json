@@ -8,11 +8,13 @@
       "id": "scan",
       "name": "Code scanné",
       "queryable": {
-        "_desc": "Retourne le code EAN détecté",
-        "ean": {
-          "type": "text"
-        }
-      }
+    "ean": "",
+    "__desc_progress": {
+      "name": "ean",
+      "locale_name": { "fr_FR": "EAN 13" },
+      "type": "text"
+    }
     }
   ]
 }
+
