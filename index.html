@@ -3,8 +3,19 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body{margin:0;background:black;color:white;text-align:center;font-family:Arial}
-video{width:100vw;height:100vh;object-fit:cover}
+body{
+margin:0;
+background:black;
+color:white;
+text-align:center;
+font-family:Arial
+}
+
+video{
+width:100vw;
+height:100vh;
+object-fit:cover
+}
 
 #box{
 position:fixed;
@@ -42,47 +53,53 @@ font-size:18px
 <body>
 
 <video id="video" playsinline></video>
-
 <div id="box"></div>
-
 <div id="txt">Activer la caméra</div>
-
 <button id="start">Scanner</button>
 
 <script>
 
-const video=document.getElementById("video");
-const txt=document.getElementById("txt");
-const btn=document.getElementById("start");
+const video = document.getElementById("video");
+const txt = document.getElementById("txt");
+const btn = document.getElementById("start");
 
 let detector;
-let running=false;
+let running = false;
+let lastEAN = "";
 
-btn.onclick=async()=>{
+if (window.PandaBridge) {
+  PandaBridge.listen("scan", function () {
+    PandaBridge.send({
+      ean: lastEAN
+    });
+  });
+}
+
+btn.onclick = async () => {
 
 btn.style.display="none";
 txt.innerHTML="Autorisation caméra...";
 
-const stream=await navigator.mediaDevices.getUserMedia({
+const stream = await navigator.mediaDevices.getUserMedia({
 video:{facingMode:"environment"}
 });
 
-video.srcObject=stream;
+video.srcObject = stream;
 await video.play();
 
 txt.innerHTML="Scanner en cours...";
 
-detector=new BarcodeDetector({
+detector = new BarcodeDetector({
 formats:['ean_13','ean_8']
 });
 
-running=true;
+running = true;
 scan();
 
 };
 
-let lastCode=null;
-let count=0;
+let lastCode = null;
+let count = 0;
 
 async function scan(){
 
@@ -90,33 +107,28 @@ if(!running) return;
 
 try{
 
-const codes=await detector.detect(video);
+const codes = await detector.detect(video);
 
 if(codes.length){
 
-const code=codes[0].rawValue;
+const code = codes[0].rawValue;
 
-if(code===lastCode){
+if(code === lastCode){
 count++;
 }else{
-lastCode=code;
-count=1;
+lastCode = code;
+count = 1;
 }
 
-txt.innerHTML="Lecture : "+code+" ("+count+")";
+txt.innerHTML = "Lecture : " + code + " ("+count+")";
 
-if(count>=4){
+if(count >= 4){
 
 txt.innerHTML="Code détecté : "+code;
 
-/* envoi à PandaSuite */
+lastEAN = String(code);
 
-window.parent.postMessage(
-JSON.stringify({ean:code}),
-"*"
-);
-
-running=false;
+running = false;
 return;
 
 }
