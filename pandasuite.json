@@ -2,7 +2,6 @@
   "version": "2.0.0",
   "name": "Scanner EAN",
   "main": "index.html",
-
   "events": [
     {
       "id": "scan",
@@ -11,8 +10,10 @@
         "ean": "",
         "__desc_progress": {
           "name": "ean",
-          "locale_name": { "fr_FR": "EAN 13" },
-          "type": "text"
+          "type": "text",
+          "locale_name": {
+            "fr_FR": "EAN 13"
+          }
         }
       }
     }
