@@ -36,12 +36,12 @@ let running=false;
 let lastEAN = "";
 
 /* 🔹 PandaSuite va appeler cette fonction quand tu fais l'action "Code scanné" */
-if(window.PandaBridge){
-document.addEventListener("pandasuite:scan", function () {
-  PandaBridge.send({
-    ean: lastEAN
+if (window.PandaBridge) {
+  PandaBridge.listen("scan", function () {
+    PandaBridge.send({
+      ean: lastEAN
+    });
   });
-});
 }
 
 btn.onclick = async () => {
