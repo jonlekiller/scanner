@@ -31,11 +31,9 @@ const btn = document.getElementById("start");
 
 let detector;
 let running=false;
+let lastEAN="";
 
-/* 🔹 valeur mémorisée pour PandaSuite */
-let lastEAN = "";
-
-/* 🔹 PandaSuite va appeler cette fonction quand tu fais l'action "Code scanné" */
+/* écoute de l'action PandaSuite */
 if (window.PandaBridge) {
   PandaBridge.listen("scan", function () {
     PandaBridge.send({
@@ -66,8 +64,8 @@ btn.onclick = async () => {
   scan();
 };
 
-let lastCode = null;
-let count = 0;
+let lastCode=null;
+let count=0;
 
 async function scan(){
   if(!running) return;
@@ -76,28 +74,27 @@ async function scan(){
     const codes = await detector.detect(video);
 
     if(codes.length){
-      const code = codes[0].rawValue;
+      const code=codes[0].rawValue;
 
-      if(code === lastCode){
+      if(code===lastCode){
         count++;
       }else{
-        lastCode = code;
-        count = 1;
+        lastCode=code;
+        count=1;
       }
 
-      txt.innerHTML = "Lecture : " + code + " ("+count+")";
+      txt.innerHTML="Lecture : "+code+" ("+count+")";
 
-      // 🔹 on valide seulement après 4 lectures identiques
-      if(count >= 4){
+      if(count>=4){
         txt.innerHTML="Code détecté : "+code;
 
-        /* on stocke le code — on ne l'envoie plus */
-        lastEAN = String(code);
+        lastEAN=String(code);
 
         running=false;
         return;
       }
     }
+
   }catch(e){}
 
   requestAnimationFrame(scan);
