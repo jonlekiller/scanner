@@ -25,39 +25,29 @@ padding:14px 24px;background:#00FF88;color:black;border-radius:10px
 <button id="start">Scanner</button>
 
 <script>
-const video = document.getElementById("video");
-const txt = document.getElementById("txt");
-const btn = document.getElementById("start");
+
+const video=document.getElementById("video");
+const txt=document.getElementById("txt");
+const btn=document.getElementById("start");
 
 let detector;
 let running=false;
-let lastEAN = "";
 
-/* écoute de l'action PandaSuite */
-
-if (window.PandaBridge) {
-  PandaBridge.listen("scan", function () {
-    PandaBridge.send({
-      ean: lastEAN
-    });
-  });
-}
-
-btn.onclick = async () => {
+btn.onclick=async()=>{
 
   btn.style.display="none";
   txt.innerHTML="Autorisation caméra...";
 
-  const stream = await navigator.mediaDevices.getUserMedia({
-    video:{ facingMode:"environment" }
+  const stream=await navigator.mediaDevices.getUserMedia({
+    video:{facingMode:"environment"}
   });
 
-  video.srcObject = stream;
+  video.srcObject=stream;
   await video.play();
 
   txt.innerHTML="Scanner en cours...";
 
-  detector = new BarcodeDetector({
+  detector=new BarcodeDetector({
     formats:['ean_13','ean_8']
   });
 
@@ -69,12 +59,15 @@ let lastCode=null;
 let count=0;
 
 async function scan(){
+
   if(!running) return;
 
   try{
-    const codes = await detector.detect(video);
+
+    const codes=await detector.detect(video);
 
     if(codes.length){
+
       const code=codes[0].rawValue;
 
       if(code===lastCode){
@@ -87,9 +80,12 @@ async function scan(){
       txt.innerHTML="Lecture : "+code+" ("+count+")";
 
       if(count>=4){
+
         txt.innerHTML="Code détecté : "+code;
 
-        lastEAN=String(code);
+        if(window.PandaBridge){
+          PandaBridge.send("ean:"+code);
+        }
 
         running=false;
         return;
@@ -100,6 +96,7 @@ async function scan(){
 
   requestAnimationFrame(scan);
 }
+
 </script>
 
 </body>
