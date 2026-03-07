@@ -31,9 +31,10 @@ const btn = document.getElementById("start");
 
 let detector;
 let running=false;
-let lastEAN="1234567890123";
+let lastEAN = "";
 
 /* écoute de l'action PandaSuite */
+
 if (window.PandaBridge) {
   PandaBridge.listen("scan", function () {
     PandaBridge.send({
