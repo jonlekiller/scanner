@@ -75,15 +75,12 @@ function setupBridge(){
 
   if(window.PandaBridge && PandaBridge.listen){
 
-   PandaBridge.listen("scan", function(){
+    PandaBridge.listen("scan", function(){
 
-  PandaBridge.send({
-    scan:{
-      ean:lastEAN || ""
-    }
-  });
-
-});
+      PandaBridge.send({
+        scan:{
+          ean:lastEAN || ""
+        }
       });
 
     });
@@ -92,11 +89,7 @@ function setupBridge(){
 
     setTimeout(setupBridge,200);
 
-  }
-
-}
-
-setupBridge();
+  };
 
 btn.onclick = async () => {
 
