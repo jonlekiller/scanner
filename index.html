@@ -73,7 +73,7 @@ function setupBridge(){
     console.log("PandaBridge prêt");
 
     PandaBridge.listen("scan", function () {
-      console.log("PandaSuite demande la valeur");
+      alert("PandaSuite a appelé l'action scan");
       PandaBridge.send({
         ean: lastEAN
       });
