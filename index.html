@@ -73,8 +73,10 @@ function setupBridge(){
    
     PandaBridge.listen("scan", function () {
       PandaBridge.send({
-        ean: lastEAN
-      });
+  scan: {
+    ean: lastEAN
+  }
+});
     });
 
   } else {
