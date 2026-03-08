@@ -67,11 +67,17 @@ const txt = document.getElementById("txt");
 const btn = document.getElementById("start");
 
 let detector;
-let running=false;
-let lastEAN="";
-let scanned=false;
+let running = false;
 
-PandaBridge.listen("scan",function(){
+let lastEAN = "";
+let scanned = false;
+
+/* attendre PandaBridge */
+function setupBridge(){
+
+if(window.PandaBridge && PandaBridge.listen){
+
+PandaBridge.listen("scan", function(){
 
 if(!scanned){
 return;
@@ -113,13 +119,13 @@ detector = new BarcodeDetector({
 formats:['ean_13','ean_8']
 });
 
-running=true;
+running = true;
 scan();
 
 };
 
-let lastCode=null;
-let count=0;
+let lastCode = null;
+let count = 0;
 
 async function scan(){
 
@@ -131,25 +137,25 @@ const codes = await detector.detect(video);
 
 if(codes.length){
 
-const code=codes[0].rawValue;
+const code = codes[0].rawValue;
 
-if(code===lastCode){
+if(code === lastCode){
 count++;
 }else{
-lastCode=code;
-count=1;
+lastCode = code;
+count = 1;
 }
 
-txt.innerHTML="Lecture : "+code+" ("+count+")";
+txt.innerHTML = "Lecture : " + code + " ("+count+")";
 
-if(count>=4){
+if(count >= 4){
 
 txt.innerHTML="Code détecté : "+code;
 
-/* on stocke l'EAN */
-lastEAN=String(code);
+lastEAN = String(code);
+scanned = true;
 
-running=false;
+running = false;
 return;
 
 }
