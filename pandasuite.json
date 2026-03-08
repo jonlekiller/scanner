@@ -6,14 +6,9 @@
     {
       "id": "scan",
       "name": "Code scanné",
-      "queryable": {
-        "ean": "",
-        "__desc_progress": {
-          "name": "ean",
-          "type": "text",
-          "locale_name": {
-            "fr_FR": "EAN 13"
-          }
+      "data": {
+        "ean": {
+          "type": "text"
         }
       }
     }
