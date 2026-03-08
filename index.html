@@ -68,6 +68,36 @@ const btn = document.getElementById("start");
 
 let detector;
 let running=false;
+let lastEAN="";
+
+/* attendre PandaBridge */
+function setupBridge(){
+
+if(window.PandaBridge && PandaBridge.listen){
+
+PandaBridge.listen("scan",function(){
+
+if(lastEAN){
+
+PandaBridge.send({
+scan:{
+ean:lastEAN
+}
+});
+
+}
+
+});
+
+}else{
+
+setTimeout(setupBridge,200);
+
+}
+
+}
+
+setupBridge();
 
 btn.onclick = async () => {
 
@@ -120,13 +150,8 @@ if(count>=4){
 
 txt.innerHTML="Code détecté : "+code;
 
-if(window.PandaBridge){
-
-PandaBridge.send("scan",{
-ean:String(code)
-});
-
-}
+/* on stocke l'EAN */
+lastEAN=String(code);
 
 running=false;
 return;
