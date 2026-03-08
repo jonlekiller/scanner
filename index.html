@@ -1,12 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{
+margin:0;
+background:black;
+color:white;
+text-align:center;
+font-family:Arial
+}
+
+video{
+width:100vw;
+height:100vh;
+object-fit:cover
+}
+
+#box{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+width:70%;
+height:25%;
+border:4px solid #00FF88;
+border-radius:12px
+}
+
+#start{
+position:fixed;
+bottom:40px;
+left:50%;
+transform:translateX(-50%);
+padding:14px 24px;
+background:#00FF88;
+color:black;
+border-radius:10px;
+border:none;
+font-size:18px
+}
+
+#txt{
+position:fixed;
+top:30px;
+width:100%;
+font-size:18px
+}
+</style>
+</head>
+
+<body>
+
+<video id="video" playsinline></video>
+<div id="box"></div>
+<div id="txt">Activer la caméra</div>
+<button id="start">Scanner</button>
+
 <script>
-let lastEAN = "1234567890123";
-console.log("PandaBridge actif :", !!window.PandaBridge);
+
+const video = document.getElementById("video");
+const txt = document.getElementById("txt");
+const btn = document.getElementById("start");
+
+let detector;
+let running = false;
+let lastEAN = "";
+
 if (window.PandaBridge) {
   PandaBridge.listen("scan", function () {
-    console.log("PandaSuite demande la valeur");
     PandaBridge.send({
       ean: lastEAN
     });
   });
 }
+
+btn.onclick = async () => {
+
+btn.style.display="none";
+txt.innerHTML="Autorisation caméra...";
+
+const stream = await navigator.mediaDevices.getUserMedia({
+video:{facingMode:"environment"}
+});
+
+video.srcObject = stream;
+await video.play();
+
+txt.innerHTML="Scanner en cours...";
+
+detector = new BarcodeDetector({
+formats:['ean_13','ean_8']
+});
+
+running = true;
+scan();
+
+};
+
+let lastCode = null;
+let count = 0;
+
+async function scan(){
+
+if(!running) return;
+
+try{
+
+const codes = await detector.detect(video);
+
+if(codes.length){
+
+const code = codes[0].rawValue;
+
+if(code === lastCode){
+count++;
+}else{
+lastCode = code;
+count = 1;
+}
+
+txt.innerHTML = "Lecture : " + code + " ("+count+")";
+
+if(count >= 4){
+
+txt.innerHTML="Code détecté : "+code;
+
+lastEAN = String(code);
+
+running = false;
+return;
+
+}
+
+}
+
+}catch(e){}
+
+requestAnimationFrame(scan);
+
+}
+
 </script>
+
+</body>
+</html>
