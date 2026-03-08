@@ -68,24 +68,20 @@ const btn = document.getElementById("start");
 
 let detector;
 let running=false;
-let lastEAN="1234567890123";
-
-/* attendre PandaBridge */
-function setupBridge(){
-
-if(window.PandaBridge && PandaBridge.listen){
+let lastEAN="";
+let scanned=false;
 
 PandaBridge.listen("scan",function(){
 
-if(lastEAN){
+if(!scanned){
+return;
+}
 
 PandaBridge.send({
 scan:{
 ean:lastEAN
 }
 });
-
-}
 
 });
 
