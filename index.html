@@ -70,10 +70,8 @@ let lastEAN = "";
 /* attendre que PandaBridge soit prêt */
 function setupBridge(){
   if (window.PandaBridge && PandaBridge.listen) {
-    console.log("PandaBridge prêt");
-
+   
     PandaBridge.listen("scan", function () {
-      alert("PandaSuite a appelé l'action scan");
       PandaBridge.send({
         ean: lastEAN
       });
