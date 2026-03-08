@@ -77,14 +77,15 @@ function setupBridge(){
 
   if(window.PandaBridge && PandaBridge.listen){
 
-    PandaBridge.listen("scan", function(){
+   PandaBridge.listen("scan", function(){
 
-      if(!scanned) return;
+  PandaBridge.send({
+    scan:{
+      ean:lastEAN || ""
+    }
+  });
 
-      PandaBridge.send({
-        scan:{
-          ean:lastEAN
-        }
+});
       });
 
     });
