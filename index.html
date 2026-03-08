@@ -58,7 +58,6 @@ font-size:18px
 <button id="start">Scanner</button>
 
 <script>
-
 const video = document.getElementById("video");
 const txt = document.getElementById("txt");
 const btn = document.getElementById("start");
@@ -67,13 +66,24 @@ let detector;
 let running = false;
 let lastEAN = "";
 
-if (window.PandaBridge) {
-  PandaBridge.listen("scan", function () {
-    PandaBridge.send({
-      ean: lastEAN
+/* attendre que PandaBridge soit prêt */
+function setupBridge(){
+  if (window.PandaBridge && PandaBridge.listen) {
+    console.log("PandaBridge prêt");
+
+    PandaBridge.listen("scan", function () {
+      console.log("PandaSuite demande la valeur");
+      PandaBridge.send({
+        ean: lastEAN
+      });
     });
-  });
+
+  } else {
+    setTimeout(setupBridge, 200);
+  }
 }
+
+setupBridge();
 
 btn.onclick = async () => {
 
