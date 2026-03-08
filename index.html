@@ -1,6 +1,6 @@
 <script>
 let lastEAN = "1234567890123";
-
+console.log("PandaBridge actif :", !!window.PandaBridge);
 if (window.PandaBridge) {
   PandaBridge.listen("scan", function () {
     console.log("PandaSuite demande la valeur");
