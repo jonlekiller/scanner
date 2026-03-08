@@ -75,27 +75,25 @@ let scanned = false;
 /* attendre PandaBridge */
 function setupBridge(){
 
-if(window.PandaBridge && PandaBridge.listen){
+  if(window.PandaBridge && PandaBridge.listen){
 
-PandaBridge.listen("scan", function(){
+    PandaBridge.listen("scan", function(){
 
-if(!scanned){
-return;
-}
+      if(!scanned) return;
 
-PandaBridge.send({
-scan:{
-ean:lastEAN
-}
-});
+      PandaBridge.send({
+        scan:{
+          ean:lastEAN
+        }
+      });
 
-});
+    });
 
-}else{
+  } else {
 
-setTimeout(setupBridge,200);
+    setTimeout(setupBridge,200);
 
-}
+  }
 
 }
 
