@@ -4,58 +4,62 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <script src="https://cdn.jsdelivr.net/npm/pandasuite-bridge/lib/pandasuite-bridge.min.js"></script>
-<script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.js"></script>
+<script src="https://unpkg.com/@zxing/library@latest"></script>
 
 <style>
-body{margin:0;background:black;color:white;font-family:Arial}
-#scanner{width:100vw;height:100vh}
-#txt{position:fixed;top:20px;width:100%;text-align:center;font-size:18px}
+body{margin:0;background:black;color:white;font-family:Arial;text-align:center}
+
+video{
+width:100vw;
+height:100vh;
+object-fit:cover
+}
+
+#txt{
+position:fixed;
+top:20px;
+width:100%;
+font-size:20px
+}
+
+#scanbox{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+width:70%;
+height:25%;
+border:4px solid #00FF88;
+border-radius:12px
+}
 </style>
 </head>
 
 <body>
 
-<div id="txt">Place le code-barres devant la caméra</div>
-<div id="scanner"></div>
+<div id="txt">Place le code-barres dans le cadre</div>
+<div id="scanbox"></div>
+<video id="video"></video>
 
 <script>
 
 const txt=document.getElementById("txt");
+const video=document.getElementById("video");
 
-Quagga.init({
+const codeReader = new ZXing.BrowserMultiFormatReader();
 
-inputStream:{
-type:"LiveStream",
-target:document.querySelector('#scanner'),
-constraints:{
-facingMode:"environment"
+codeReader.decodeFromVideoDevice(null, video, (result, err) => {
+
+if(result){
+
+const code=result.text;
+
+txt.innerHTML="✔ Code détecté : "+code;
+
+/* vibration téléphone */
+if(navigator.vibrate){
+navigator.vibrate(200);
 }
-},
-
-decoder:{
-readers:[
-"ean_reader",
-"ean_8_reader",
-"code_128_reader"
-]
-}
-
-},function(err){
-
-if(err){
-txt.innerHTML="Erreur caméra";
-return;
-}
-
-Quagga.start();
-
-});
-
-Quagga.onDetected(function(result){
-
-const code=result.codeResult.code;
-
-txt.innerHTML="Code détecté : "+code;
 
 /* envoyer à PandaSuite */
 
@@ -65,7 +69,10 @@ ean:code
 });
 }
 
-Quagga.stop();
+/* arrêter le scan */
+codeReader.reset();
+
+}
 
 });
 
