@@ -7,7 +7,7 @@
 <script src="https://unpkg.com/@zxing/library@latest"></script>
 
 <style>
-body{margin:0;background:black;color:white;font-family:Arial;text-align:center}
+body{margin:0;background:black;color:white;text-align:center;font-family:Arial}
 
 video{
 width:100vw;
@@ -22,7 +22,7 @@ width:100%;
 font-size:20px
 }
 
-#scanbox{
+#box{
 position:fixed;
 top:50%;
 left:50%;
@@ -37,8 +37,8 @@ border-radius:12px
 
 <body>
 
-<div id="txt">Place le code-barres dans le cadre</div>
-<div id="scanbox"></div>
+<div id="txt">Scanner le code-barres</div>
+<div id="box"></div>
 <video id="video"></video>
 
 <script>
@@ -48,7 +48,18 @@ const video=document.getElementById("video");
 
 const codeReader = new ZXing.BrowserMultiFormatReader();
 
-codeReader.decodeFromVideoDevice(null, video, (result, err) => {
+async function start(){
+
+const devices = await codeReader.listVideoInputDevices();
+
+/* choisir caméra arrière */
+let backCamera = devices.find(d => d.label.toLowerCase().includes("back"));
+
+if(!backCamera){
+backCamera = devices[0];
+}
+
+codeReader.decodeFromVideoDevice(backCamera.deviceId, video, (result, err) => {
 
 if(result){
 
@@ -56,7 +67,7 @@ const code=result.text;
 
 txt.innerHTML="✔ Code détecté : "+code;
 
-/* vibration téléphone */
+/* vibration */
 if(navigator.vibrate){
 navigator.vibrate(200);
 }
@@ -69,12 +80,15 @@ ean:code
 });
 }
 
-/* arrêter le scan */
 codeReader.reset();
 
 }
 
 });
+
+}
+
+start();
 
 </script>
 
