@@ -7,18 +7,20 @@
 <script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.js"></script>
 
 <style>
-body{margin:0;background:black}
+body{margin:0;background:black;color:white;font-family:Arial}
 #scanner{width:100vw;height:100vh}
-#txt{position:fixed;top:20px;width:100%;color:white;text-align:center}
+#txt{position:fixed;top:20px;width:100%;text-align:center;font-size:18px}
 </style>
 </head>
 
 <body>
 
-<div id="txt">Scanner le code-barres</div>
+<div id="txt">Place le code-barres devant la caméra</div>
 <div id="scanner"></div>
 
 <script>
+
+const txt=document.getElementById("txt");
 
 Quagga.init({
 
@@ -41,7 +43,7 @@ readers:[
 },function(err){
 
 if(err){
-console.log(err);
+txt.innerHTML="Erreur caméra";
 return;
 }
 
@@ -53,12 +55,14 @@ Quagga.onDetected(function(result){
 
 const code=result.codeResult.code;
 
-if(window.PandaBridge){
+txt.innerHTML="Code détecté : "+code;
 
-PandaBridge.send("scan",{
+/* envoyer à PandaSuite */
+
+if(window.PandaBridge){
+PandaBridge.send({
 ean:code
 });
-
 }
 
 Quagga.stop();
