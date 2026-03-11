@@ -4,10 +4,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <script src="https://cdn.jsdelivr.net/npm/pandasuite-bridge/lib/pandasuite-bridge.min.js"></script>
-<script src="https://unpkg.com/@zxing/library@latest"></script>
+<script src="https://unpkg.com/@zxing/browser@latest"></script>
 
 <style>
-body{margin:0;background:black;color:white;text-align:center;font-family:Arial}
+body{margin:0;background:black;color:white;font-family:Arial;text-align:center}
 
 video{
 width:100vw;
@@ -19,7 +19,7 @@ object-fit:cover
 position:fixed;
 top:20px;
 width:100%;
-font-size:20px
+font-size:22px
 }
 
 #box{
@@ -37,7 +37,7 @@ border-radius:12px
 
 <body>
 
-<div id="txt">Scanner le code-barres</div>
+<div id="txt">Place le code-barres dans le cadre</div>
 <div id="box"></div>
 <video id="video"></video>
 
@@ -46,28 +46,27 @@ border-radius:12px
 const txt=document.getElementById("txt");
 const video=document.getElementById("video");
 
-const codeReader = new ZXing.BrowserMultiFormatReader();
+const reader = new ZXingBrowser.BrowserMultiFormatReader();
 
 async function start(){
 
-const devices = await codeReader.listVideoInputDevices();
+const devices = await ZXingBrowser.BrowserCodeReader.listVideoInputDevices();
 
 /* choisir caméra arrière */
-let backCamera = devices.find(d => d.label.toLowerCase().includes("back"));
+let back = devices.find(d => d.label.toLowerCase().includes("back"));
 
-if(!backCamera){
-backCamera = devices[0];
+if(!back){
+back = devices[0];
 }
 
-codeReader.decodeFromVideoDevice(backCamera.deviceId, video, (result, err) => {
+reader.decodeFromVideoDevice(back.deviceId, video, (result, err) => {
 
 if(result){
 
-const code=result.text;
+const code=result.getText();
 
 txt.innerHTML="✔ Code détecté : "+code;
 
-/* vibration */
 if(navigator.vibrate){
 navigator.vibrate(200);
 }
@@ -80,7 +79,7 @@ ean:code
 });
 }
 
-codeReader.reset();
+reader.reset();
 
 }
 
